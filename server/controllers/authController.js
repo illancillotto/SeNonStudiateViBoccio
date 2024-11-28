@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const User = require('../models/UserModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { validationResult } = require('express-validator');
@@ -57,24 +57,38 @@ class AuthController {
     try {
       const { email, password } = req.body;
 
+      // Validate input presence
+      if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' });
+      }
+
       // Find user
       const user = await User.findOne({ email });
       if (!user) {
+        console.log(`Login attempt failed: No user found with email ${email}`);
         return res.status(400).json({ error: 'Invalid credentials' });
       }
 
       // Verify password
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
+        console.log(`Login attempt failed: Invalid password for user ${email}`);
         return res.status(400).json({ error: 'Invalid credentials' });
       }
 
       // Generate JWT
       const token = jwt.sign(
-        { id: user._id, email: user.email },
+        { 
+          id: user._id, 
+          email: user.email,
+          name: user.name // Adding name to token payload
+        },
         process.env.JWT_SECRET,
         { expiresIn: '24h' }
       );
+
+      // Log successful login
+      console.log(`User logged in successfully: ${email}`);
 
       res.json({
         token,

@@ -1,82 +1,105 @@
 import React, { useState, useEffect } from 'react';
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import axios from 'axios';
-import '../styles/Dashboard.css';
+import { Box, Paper, Typography, Grid, CircularProgress } from '@mui/material';
+import { Doughnut, Bar } from 'react-chartjs-2';
 
 function Dashboard() {
-  const [stats, setStats] = useState({
-    quizzes: [],
-    shellCommands: [],
-    dailyActivity: []
-  });
+    const [dashboardData, setDashboardData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/dashboard/stats`);
+                setDashboardData(response.data);
+                setLoading(false);
+            } catch (err) {
+                setError('Error fetching dashboard data');
+                setLoading(false);
+            }
+        };
 
-  const fetchDashboardData = async () => {
-    try {
-      const response = await axios.get('/api/dashboard/stats');
-      setStats(response.data);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    }
-  };
+        fetchDashboardData();
+    }, []);
 
-  return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
-        <h2>Learning Progress Dashboard</h2>
-      </div>
+    if (loading) return (
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+            <CircularProgress />
+        </Box>
+    );
+    
+    if (error) return (
+        <Paper sx={{ p: 2, backgroundColor: '#fff3f3' }}>
+            <Typography color="error">{error}</Typography>
+        </Paper>
+    );
 
-      <div className="dashboard-grid">
-        <div className="dashboard-card">
-          <h3>Quiz Performance</h3>
-          <Line
-            data={{
-              labels: stats.quizzes.map(q => q.date),
-              datasets: [{
-                label: 'Quiz Scores',
-                data: stats.quizzes.map(q => q.score),
-                borderColor: '#4CAF50'
-              }]
-            }}
-          />
-        </div>
+    const progressChartData = {
+        labels: ['Completato', 'Rimanente'],
+        datasets: [{
+            data: [dashboardData?.stats.progressPercentage || 0, 100 - (dashboardData?.stats.progressPercentage || 0)],
+            backgroundColor: ['#4CAF50', '#e0e0e0'],
+        }]
+    };
 
-        <div className="dashboard-card">
-          <h3>Most Used Shell Commands</h3>
-          <Bar
-            data={{
-              labels: stats.shellCommands.map(cmd => cmd.command),
-              datasets: [{
-                label: 'Usage Count',
-                data: stats.shellCommands.map(cmd => cmd.count),
-                backgroundColor: '#2196F3'
-              }]
-            }}
-          />
-        </div>
+    return (
+        <Box>
+            <Grid container spacing={3}>
+                <Grid item xs={12} md={4}>
+                    <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 240 }}>
+                        <Typography variant="h6" gutterBottom>
+                            Progresso Generale
+                        </Typography>
+                        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <Doughnut 
+                                data={progressChartData}
+                                options={{
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    cutout: '70%'
+                                }}
+                            />
+                        </Box>
+                    </Paper>
+                </Grid>
 
-        <div className="dashboard-card">
-          <h3>Activity Distribution</h3>
-          <Doughnut
-            data={{
-              labels: ['Quizzes', 'Shell Practice', 'Theory Reading'],
-              datasets: [{
-                data: [
-                  stats.dailyActivity.quizzes,
-                  stats.dailyActivity.shell,
-                  stats.dailyActivity.theory
-                ],
-                backgroundColor: ['#FF9800', '#2196F3', '#4CAF50']
-              }]
-            }}
-          />
-        </div>
-      </div>
-    </div>
-  );
+                <Grid item xs={12} md={4}>
+                    <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 240 }}>
+                        <Typography variant="h6" gutterBottom>
+                            Statistiche
+                        </Typography>
+                        <Box sx={{ mt: 2 }}>
+                            <Typography variant="body1">
+                                Quiz Completati: {dashboardData?.stats.completedQuizzes || 0}
+                            </Typography>
+                            <Typography variant="body1">
+                                Moduli Totali: {dashboardData?.stats.totalModules || 0}
+                            </Typography>
+                            <Typography variant="body1">
+                                Progresso: {Math.round(dashboardData?.stats.progressPercentage || 0)}%
+                            </Typography>
+                        </Box>
+                    </Paper>
+                </Grid>
+
+                <Grid item xs={12} md={4}>
+                    <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 240 }}>
+                        <Typography variant="h6" gutterBottom>
+                            Attività Recenti
+                        </Typography>
+                        <Box sx={{ mt: 2, overflow: 'auto' }}>
+                            {dashboardData?.stats.recentActivity?.map((activity, index) => (
+                                <Typography key={index} variant="body2" sx={{ mb: 1 }}>
+                                    Modulo {activity.module} - {new Date(activity.updatedAt).toLocaleDateString()}
+                                </Typography>
+                            ))}
+                        </Box>
+                    </Paper>
+                </Grid>
+            </Grid>
+        </Box>
+    );
 }
 
 export default Dashboard;

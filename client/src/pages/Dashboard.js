@@ -14,7 +14,7 @@ function Dashboard() {
 
   const fetchUserData = async () => {
     try {
-      const response = await axios.get('/api/progress');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/progress`);
       setUserData(response.data);
     } catch (error) {
       console.error('Error fetching user data:', error);

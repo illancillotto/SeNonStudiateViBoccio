@@ -14,7 +14,7 @@ function ProgressTracker() {
 
   const fetchProgress = async () => {
     try {
-      const response = await axios.get('/api/progress');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/progress`);
       setProgress(response.data);
     } catch (error) {
       console.error('Error fetching progress:', error);
@@ -24,7 +24,7 @@ function ProgressTracker() {
   return (
     <div className="progress-container">
       <div className="progress-section">
-        <h3>Quiz Progress</h3>
+        <h3>Progresso Quiz</h3>
         <div className="quiz-progress">
           {progress.quizzes.map(quiz => (
             <div key={quiz._id} className="progress-item">
@@ -42,12 +42,12 @@ function ProgressTracker() {
       </div>
 
       <div className="progress-section">
-        <h3>Shell Activities</h3>
+        <h3>Attività Terminale</h3>
         <div className="shell-progress">
           {progress.shellActivities.map((activity, index) => (
             <div key={index} className="activity-item">
               <span className="timestamp">
-                {new Date(activity.timestamp).toLocaleDateString()}
+                {new Date(activity.timestamp).toLocaleDateString('it-IT')}
               </span>
               <span className="command">{activity.details.command}</span>
             </div>

@@ -14,7 +14,7 @@ function Quiz() {
 
   const fetchQuizzes = async () => {
     try {
-      const response = await axios.get('/api/quiz');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/quiz`);
       setQuizzes(response.data);
     } catch (error) {
       console.error('Error fetching quizzes:', error);
@@ -39,7 +39,7 @@ function Quiz() {
     } else {
       // Submit quiz
       try {
-        await axios.post('/api/quiz/submit', {
+        await axios.post(`${process.env.REACT_APP_API_URL}/api/quiz/submit`, {
           quizId: currentQuiz._id,
           answers: newAnswers
         });
@@ -54,18 +54,18 @@ function Quiz() {
     <div className="quiz-container">
       {!currentQuiz ? (
         <div className="quiz-list">
-          <h2>Available Quizzes</h2>
+          <h2>Quiz Disponibili</h2>
           {quizzes.map(quiz => (
             <div key={quiz._id} className="quiz-card">
               <h3>{quiz.title}</h3>
               <p>{quiz.description}</p>
-              <button onClick={() => startQuiz(quiz)}>Start Quiz</button>
+              <button onClick={() => startQuiz(quiz)}>Inizia Quiz</button>
             </div>
           ))}
         </div>
       ) : (
         <div className="quiz-question">
-          <h3>Question {currentQuestion + 1}</h3>
+          <h3>Domanda {currentQuestion + 1}</h3>
           <p>{currentQuiz.questions[currentQuestion].question}</p>
           <div className="options">
             {currentQuiz.questions[currentQuestion].options.map((option, index) => (

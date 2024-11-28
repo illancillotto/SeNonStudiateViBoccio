@@ -14,7 +14,7 @@ const authRoutes = require('./routes/auth');
 const quizRoutes = require('./routes/quiz');
 const shellRoutes = require('./routes/shell');
 const progressRoutes = require('./routes/progress');
-
+const dashboardRoutes = require('./routes/dashboardRoutes');
 // Load environment variables
 dotenv.config();
 
@@ -49,6 +49,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/shell', shellRoutes);
 app.use('/api/progress', progressRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Add this after your other middleware setup
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));

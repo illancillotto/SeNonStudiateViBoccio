@@ -1,8 +1,14 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Box } from '@mui/material';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Home from './pages/Home';
+import Quiz from './pages/Quiz';
+import Dashboard from './pages/Dashboard';
+import Shell from './pages/Shell';
 import PrivateRoute from './components/PrivateRoute';
+import Navbar from './components/Navbar';
 
 function App() {
   return (
@@ -11,26 +17,21 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route
-          path="/"
+          path="/*"
           element={
             <PrivateRoute>
-              <div>Home Page</div>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/quiz"
-          element={
-            <PrivateRoute>
-              <div>Quiz Page</div>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/progress"
-          element={
-            <PrivateRoute>
-              <div>Progress Page</div>
+              <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+                <Navbar />
+                <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/home" element={<Home />} />
+                    <Route path="/quiz" element={<Quiz />} />
+                    <Route path="/shell" element={<Shell />} />
+                    <Route path="/progress" element={<Dashboard />} />
+                  </Routes>
+                </Box>
+              </Box>
             </PrivateRoute>
           }
         />
